@@ -46,9 +46,3 @@ model Blog {
   subjectId String
 }
 
-// model Link {
-//   id          String   @id @default(uuid()) // 4
-//   createdAt   DateTime @default(now()) // 5
-//   description String
-//   url         String
-// }

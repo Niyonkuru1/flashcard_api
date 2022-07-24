@@ -1,44 +1,24 @@
-import {
-  objectType,
-  arg,
-  stringArg,
-  inputObjectType,
-  extendType,
-  nonNull,
-} from "nexus";
-import { NexusGenObjects, NexusGenScalars } from "../../nexus-typegen";
-import { v4 as uuid } from "uuid";
+import { objectType, stringArg, extendType, nonNull } from "nexus";
+import { NexusGenScalars } from "../../nexus-typegen";
 
-
-
-export const blog = objectType({
-  name: "newOne",
+export const newBlogSchemas = objectType({
+  name: "newBlogObjects",
   definition(t) {
-    t.string("id");
-    t.nonNull.string("question");
-    t.nonNull.string("answer");
-    t.nonNull.string("subjectId");
+   t.string("id");
+   t.nonNull.string("question");
+   t.nonNull.string("answer");
+   t.nonNull.string("subjectId");
   },
 });
 
-// export const newBlog = inputObjectType({
-//   name: "newBlog",
-//   definition(t) {
-//     t.nonNull.string("question");
-//     t.nonNull.string("answer");
-//     t.nonNull.string("subjectId");
-//   },
-// });
-
-
 const deleteMsg: NexusGenScalars["String"] =
-  "Hello you have deleted it successfully!!";
+  "Hello you have deleted << BLOG >> successfully!!";
 
-export const Query = extendType({
+export const QueryBlog = extendType({
   type: "Query",
   definition(t) {
     t.nonNull.list.nonNull.field("allBlogs", {
-      type: "newOne",
+      type: "newBlogObjects",
       //@ts-ignore
       async resolve(parent, args, { prisma }, info) {
         const allBlogs = await prisma.blog.findMany();
@@ -46,7 +26,7 @@ export const Query = extendType({
       },
     });
     t.nonNull.field("oneBlog", {
-      type: "newOne",
+      type: "newBlogObjects",
       args: {
         id: nonNull(stringArg()),
       },
@@ -58,53 +38,54 @@ export const Query = extendType({
             id,
           },
         });
-        // console.log(oneBlogData);
         return oneBlogData;
       },
     });
   },
 });
 
-export const Mutation = extendType({
+export const MutationBlog = extendType({
   type: "Mutation",
   definition(t) {
     t.nonNull.field("create_blog", {
-      type: "newOne",
+      type: "newBlogObjects",
       args: {
-        answer: nonNull(stringArg()),
         question: nonNull(stringArg()),
+        answer: nonNull(stringArg()),
         subjectId: nonNull(stringArg()),
       },
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
-        const { answer, question, subjectId } = args;
-        const newBlog = {
-          answer,
-          question,
-          subjectId,
-        };
-        const newBlogAdded: NexusGenObjects["newOne"] =
-          await prisma.blog.create({ data: newBlog });
+        const { question, answer, subjectId } = args;
+        const newBlogAdded = await prisma.blog.create({
+          //@ts-ignore
+          data: {
+            question,
+            answer,
+            subjectId
+          },
+        });
         return newBlogAdded;
       },
     });
     t.nonNull.field("update_blog", {
-      type: "newOne",
+      type: "newBlogObjects",
       args: {
+        id: nonNull(stringArg()),
         answer: nonNull(stringArg()),
         question: nonNull(stringArg()),
-        id: nonNull(stringArg()),
       },
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
-        const { answer, question, id } = args;
+        const { question, id, answer } = args;
         const updatedBlogData = await prisma.blog.update({
           where: {
             id,
           },
           data: {
-           answer,
-           question
+
+            answer,
+            question,
           },
         });
         return updatedBlogData;
@@ -115,16 +96,15 @@ export const Mutation = extendType({
         id: nonNull(stringArg()),
       },
       //@ts-ignore
-     async resolve(parent, args, { blogs, prisma }, info) {
+      async resolve(parent, args, { prisma }, info) {
         const { id } = args;
         await prisma.blog.delete({
           where: {
-            id
-          }
+            id,
+          },
         });
         return deleteMsg;
       },
     });
   },
 });
-

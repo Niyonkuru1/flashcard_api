@@ -1,51 +1,62 @@
-import {
-  objectType,
-  arg,
-  stringArg,
-  inputObjectType,
-  extendType,
-  nonNull,
-} from "nexus";
-import { NexusGenObjects, NexusGenScalars } from "../../nexus-typegen";
+import { objectType, stringArg, extendType, nonNull } from "nexus";
+import { NexusGenScalars } from "../../nexus-typegen";
 
-export const subject = objectType({
-  name: "newSubject",
+export const newBlogObjects = objectType({
+  name: "newBlogObject",
+  definition(t) {
+    t.string("id");
+    t.nonNull.string("question");
+    t.nonNull.string("answer");
+    t.nonNull.string("subjectId");
+  },
+});
+export const newSubjectSchemas = objectType({
+  name: "newSubjectObject",
   definition(t) {
     t.string("id");
     t.nonNull.string("name");
     t.nonNull.string("userId");
+    t.list.field("blogs", {
+      type: "newBlogObject",
+    });
   },
 });
 
 const deleteMsg: NexusGenScalars["String"] =
-  "Hello you have deleted it successfully!!";
+  "Hello you have deleted << SUBJECT >> successfully!!";
 
 export const QuerySubject = extendType({
   type: "Query",
   definition(t) {
     t.nonNull.list.nonNull.field("allSubjects", {
-      type: "newSubject",
+      type: "newSubjectObject",
       //@ts-ignore
       async resolve(parent, args, { prisma }, info) {
-        const allBlogs = await prisma.subject.findMany();
-        return allBlogs;
+        const allSubjects = await prisma.subject.findMany({
+          include: {
+            blogs: true, // Include all users in the returned object
+          },
+        });
+        return allSubjects;
       },
     });
     t.nonNull.field("oneSubject", {
-      type: "newSubject",
+      type: "newSubjectObject",
       args: {
         id: nonNull(stringArg()),
       },
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
         const { id } = args;
-        const oneBlogData = await prisma.subject.findUnique({
+        const oneSubjectData = await prisma.subject.findUnique({
           where: {
             id,
           },
+          include: {
+            blogs: true, // Include all users in the returned object
+          },
         });
-        // console.log(oneBlogData);
-        return oneBlogData;
+        return oneSubjectData;
       },
     });
   },
@@ -55,26 +66,29 @@ export const MutationSubject = extendType({
   type: "Mutation",
   definition(t) {
     t.nonNull.field("create_subject", {
-      type: "newSubject",
+      type: "newSubjectObject",
       args: {
-        name: nonNull(stringArg()),
         userId: nonNull(stringArg()),
-        id: stringArg(),
+        name: nonNull(stringArg())
       },
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
-        const { name, userId, id} = args;
-        const newSubject = {
-          userId,
-          name
-        };
-        const newSubjectAdded =
-          await prisma.subject.create({ data: newSubject });
+        const { userId, name } = args;
+        const newSubjectAdded = await prisma.subject.create({
+          data: {
+            //@ts-ignore
+            userId,
+            name,
+          },
+          include: {
+            blogs: true, // Include all users in the returned object
+          },
+        });
         return newSubjectAdded;
       },
     });
     t.nonNull.field("update_subject", {
-      type: "newSubject",
+      type: "newSubjectObject",
       args: {
         id: nonNull(stringArg()),
         name: nonNull(stringArg()),
@@ -82,23 +96,26 @@ export const MutationSubject = extendType({
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
         const { name, id } = args;
-        const updatedSubjectData = await prisma.subject.update({
+        const updatedUserData = await prisma.subject.update({
           where: {
             id,
           },
           data: {
-            name
+            name,
+          },
+          include: {
+            blogs: true, // Include all users in the returned object
           },
         });
-        return updatedSubjectData;
+        return updatedUserData;
       },
     });
-    t.nonNull.string("delete_delete", {
+    t.nonNull.string("delete_subject", {
       args: {
         id: nonNull(stringArg()),
       },
       //@ts-ignore
-      async resolve(parent, args, { blogs, prisma }, info) {
+      async resolve(parent, args, { prisma }, info) {
         const { id } = args;
         await prisma.subject.delete({
           where: {

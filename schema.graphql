@@ -4,13 +4,28 @@
 
 type Mutation {
   create_admin(email: String!, firstName: String!, password: String!, secondName: String!): newAdmin!
+  create_blog(answer: String!, question: String!, subjectId: String!): newBlogObjects!
+  create_subject(name: String!, userId: String!): newSubjectObject!
+  create_user(adminId: String!, email: String!, firstName: String!, password: String!, secondName: String!): newUserObject!
   delete_admin(id: String!): String!
+  delete_blog(id: String!): String!
+  delete_subject(id: String!): String!
+  delete_user(id: String!): String!
   update_admin(email: String!, id: String!, password: String!): newAdmin!
+  update_blog(answer: String!, id: String!, question: String!): newBlogObjects!
+  update_subject(id: String!, name: String!): newSubjectObject!
+  update_user(email: String!, id: String!, password: String!): newUserObject!
 }
 
 type Query {
   allAdmins: [newAdmin!]!
+  allBlogs: [newBlogObjects!]!
+  allSubjects: [newSubjectObject!]!
+  allUsers: [newUserObject!]!
   oneAdmin(id: String!): newAdmin!
+  oneBlog(id: String!): newBlogObjects!
+  oneSubject(id: String!): newSubjectObject!
+  oneUser(id: String!): newUserObject!
 }
 
 type newAdmin {
@@ -22,6 +37,33 @@ type newAdmin {
   users: [newUser]
 }
 
+type newBlogObject {
+  answer: String!
+  id: String
+  question: String!
+  subjectId: String!
+}
+
+type newBlogObjects {
+  answer: String!
+  id: String
+  question: String!
+  subjectId: String!
+}
+
+type newSubject {
+  id: String
+  name: String!
+  userId: String!
+}
+
+type newSubjectObject {
+  blogs: [newBlogObject]
+  id: String
+  name: String!
+  userId: String!
+}
+
 type newUser {
   adminId: String!
   email: String!
@@ -29,4 +71,14 @@ type newUser {
   id: String
   password: String!
   secondName: String!
+}
+
+type newUserObject {
+  adminId: String!
+  email: String!
+  firstName: String!
+  id: String
+  password: String!
+  secondName: String!
+  subjects: [newSubject]
 }
