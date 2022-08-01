@@ -30,6 +30,10 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
   Mutation: {};
   Query: {};
+  UserLoginPayload: { // root type
+    token?: string | null; // String
+    user?: NexusGenRootTypes['newUserObject'] | null; // newUserObject
+  }
   newAdmin: { // root type
     email: string; // String!
     firstName: string; // String!
@@ -42,13 +46,17 @@ export interface NexusGenObjects {
     answer: string; // String!
     id?: string | null; // String
     question: string; // String!
+    skip: number; // Int!
     subjectId: string; // String!
+    take: number; // Int!
   }
   newBlogObjects: { // root type
     answer: string; // String!
     id?: string | null; // String
     question: string; // String!
+    skip: number; // Int!
     subjectId: string; // String!
+    take: number; // Int!
   }
   newSubject: { // root type
     id?: string | null; // String
@@ -95,11 +103,12 @@ export interface NexusGenFieldTypes {
     create_admin: NexusGenRootTypes['newAdmin']; // newAdmin!
     create_blog: NexusGenRootTypes['newBlogObjects']; // newBlogObjects!
     create_subject: NexusGenRootTypes['newSubjectObject']; // newSubjectObject!
-    create_user: NexusGenRootTypes['newUserObject']; // newUserObject!
+    create_user: NexusGenRootTypes['UserLoginPayload']; // UserLoginPayload!
     delete_admin: string; // String!
     delete_blog: string; // String!
     delete_subject: string; // String!
     delete_user: string; // String!
+    login_user: NexusGenRootTypes['UserLoginPayload']; // UserLoginPayload!
     update_admin: NexusGenRootTypes['newAdmin']; // newAdmin!
     update_blog: NexusGenRootTypes['newBlogObjects']; // newBlogObjects!
     update_subject: NexusGenRootTypes['newSubjectObject']; // newSubjectObject!
@@ -115,6 +124,10 @@ export interface NexusGenFieldTypes {
     oneSubject: NexusGenRootTypes['newSubjectObject']; // newSubjectObject!
     oneUser: NexusGenRootTypes['newUserObject']; // newUserObject!
   }
+  UserLoginPayload: { // field return type
+    token: string | null; // String
+    user: NexusGenRootTypes['newUserObject'] | null; // newUserObject
+  }
   newAdmin: { // field return type
     email: string; // String!
     firstName: string; // String!
@@ -127,13 +140,17 @@ export interface NexusGenFieldTypes {
     answer: string; // String!
     id: string | null; // String
     question: string; // String!
+    skip: number; // Int!
     subjectId: string; // String!
+    take: number; // Int!
   }
   newBlogObjects: { // field return type
     answer: string; // String!
     id: string | null; // String
     question: string; // String!
+    skip: number; // Int!
     subjectId: string; // String!
+    take: number; // Int!
   }
   newSubject: { // field return type
     id: string | null; // String
@@ -170,11 +187,12 @@ export interface NexusGenFieldTypeNames {
     create_admin: 'newAdmin'
     create_blog: 'newBlogObjects'
     create_subject: 'newSubjectObject'
-    create_user: 'newUserObject'
+    create_user: 'UserLoginPayload'
     delete_admin: 'String'
     delete_blog: 'String'
     delete_subject: 'String'
     delete_user: 'String'
+    login_user: 'UserLoginPayload'
     update_admin: 'newAdmin'
     update_blog: 'newBlogObjects'
     update_subject: 'newSubjectObject'
@@ -190,6 +208,10 @@ export interface NexusGenFieldTypeNames {
     oneSubject: 'newSubjectObject'
     oneUser: 'newUserObject'
   }
+  UserLoginPayload: { // field return type name
+    token: 'String'
+    user: 'newUserObject'
+  }
   newAdmin: { // field return type name
     email: 'String'
     firstName: 'String'
@@ -202,13 +224,17 @@ export interface NexusGenFieldTypeNames {
     answer: 'String'
     id: 'String'
     question: 'String'
+    skip: 'Int'
     subjectId: 'String'
+    take: 'Int'
   }
   newBlogObjects: { // field return type name
     answer: 'String'
     id: 'String'
     question: 'String'
+    skip: 'Int'
     subjectId: 'String'
+    take: 'Int'
   }
   newSubject: { // field return type name
     id: 'String'
@@ -258,7 +284,6 @@ export interface NexusGenArgTypes {
       userId: string; // String!
     }
     create_user: { // args
-      adminId: string; // String!
       email: string; // String!
       firstName: string; // String!
       password: string; // String!
@@ -275,6 +300,10 @@ export interface NexusGenArgTypes {
     }
     delete_user: { // args
       id: string; // String!
+    }
+    login_user: { // args
+      email: string; // String!
+      password: string; // String!
     }
     update_admin: { // args
       email: string; // String!
@@ -297,6 +326,10 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    allBlogs: { // args
+      skip: number; // Int!
+      take: number; // Int!
+    }
     oneAdmin: { // args
       id: string; // String!
     }

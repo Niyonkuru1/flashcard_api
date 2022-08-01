@@ -24,6 +24,16 @@ export const newUserSchema = objectType({
   },
 });
 
+export const UserLoginPayload = objectType({
+  name: "UserLoginPayload",
+  definition(t) {
+    t.field("user", {
+      type: "newUserObject",
+    });
+    t.string("token");
+  },
+});
+
 const deleteMsg: NexusGenScalars["String"] =
   "Hello you have deleted << USER >> successfully!!";
 
@@ -48,8 +58,13 @@ export const QueryUser = extendType({
         id: nonNull(stringArg()),
       },
       //@ts-ignore
-      async resolve(parent, args, { blogs, prisma }, info) {
+      async resolve(parent, args, { userId, prisma }, info) {
         const { id } = args;
+         if (!userId) {
+           throw new Error(
+             "You are not authorised to view the subject if not signed in"
+           );
+         }
         const oneUserData = await prisma.user.findUnique({
           where: {
             id,
@@ -67,34 +82,34 @@ export const QueryUser = extendType({
 export const MutationUser = extendType({
   type: "Mutation",
   definition(t) {
-    t.nonNull.field("create_user", {
-      type: "newUserObject",
-      args: {
-        firstName: nonNull(stringArg()),
-        secondName: nonNull(stringArg()),
-        email: nonNull(stringArg()),
-        password: nonNull(stringArg()),
-        adminId: nonNull(stringArg()),
-      },
-      //@ts-ignore
-      async resolve(parent, args, { blogs, prisma }, info) {
-        const { secondName, email, password, firstName, adminId } = args;
-        const newUser = {
-          firstName,
-          password,
-          email,
-          secondName,
-          adminId,
-        };
-        const newUserAdded = await prisma.user.create({
-          data: newUser,
-          include: {
-            subjects: true, // Include all users in the returned object
-          },
-        });
-        return newUserAdded;
-      },
-    });
+    // t.nonNull.field("create_user", {
+    //   type: "newUserObject",
+    //   args: {
+    //     firstName: nonNull(stringArg()),
+    //     secondName: nonNull(stringArg()),
+    //     email: nonNull(stringArg()),
+    //     password: nonNull(stringArg()),
+    //     adminId: nonNull(stringArg()),
+    //   },
+    //   //@ts-ignore
+    //   async resolve(parent, args, { blogs, prisma }, info) {
+    //     const { secondName, email, password, firstName, adminId } = args;
+    //     const newUser = {
+    //       firstName,
+    //       password,
+    //       email,
+    //       secondName,
+    //       adminId,
+    //     };
+    //     const newUserAdded = await prisma.user.create({
+    //       data: newUser,
+    //       include: {
+    //         subjects: true, // Include all users in the returned object
+    //       },
+    //     });
+    //     return newUserAdded;
+    //   },
+    // });
     t.nonNull.field("update_user", {
       type: "newUserObject",
       args: {
@@ -137,3 +152,4 @@ export const MutationUser = extendType({
     });
   },
 });
+

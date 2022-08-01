@@ -6,11 +6,12 @@ type Mutation {
   create_admin(email: String!, firstName: String!, password: String!, secondName: String!): newAdmin!
   create_blog(answer: String!, question: String!, subjectId: String!): newBlogObjects!
   create_subject(name: String!, userId: String!): newSubjectObject!
-  create_user(adminId: String!, email: String!, firstName: String!, password: String!, secondName: String!): newUserObject!
+  create_user(email: String!, firstName: String!, password: String!, secondName: String!): UserLoginPayload!
   delete_admin(id: String!): String!
   delete_blog(id: String!): String!
   delete_subject(id: String!): String!
   delete_user(id: String!): String!
+  login_user(email: String!, password: String!): UserLoginPayload!
   update_admin(email: String!, id: String!, password: String!): newAdmin!
   update_blog(answer: String!, id: String!, question: String!): newBlogObjects!
   update_subject(id: String!, name: String!): newSubjectObject!
@@ -19,13 +20,18 @@ type Mutation {
 
 type Query {
   allAdmins: [newAdmin!]!
-  allBlogs: [newBlogObjects!]!
+  allBlogs(skip: Int!, take: Int!): [newBlogObjects!]!
   allSubjects: [newSubjectObject!]!
   allUsers: [newUserObject!]!
   oneAdmin(id: String!): newAdmin!
   oneBlog(id: String!): newBlogObjects!
   oneSubject(id: String!): newSubjectObject!
   oneUser(id: String!): newUserObject!
+}
+
+type UserLoginPayload {
+  token: String
+  user: newUserObject
 }
 
 type newAdmin {
@@ -41,14 +47,18 @@ type newBlogObject {
   answer: String!
   id: String
   question: String!
+  skip: Int!
   subjectId: String!
+  take: Int!
 }
 
 type newBlogObjects {
   answer: String!
   id: String
   question: String!
+  skip: Int!
   subjectId: String!
+  take: Int!
 }
 
 type newSubject {
