@@ -1,4 +1,4 @@
-import { objectType, stringArg, extendType, nonNull } from "nexus";
+import { objectType, stringArg, extendType, nonNull, intArg } from "nexus";
 import { NexusGenScalars } from "../../nexus-typegen";
 
 export const newBlogObjects = objectType({
@@ -8,6 +8,8 @@ export const newBlogObjects = objectType({
     t.nonNull.string("question");
     t.nonNull.string("answer");
     t.nonNull.string("subjectId");
+    t.nonNull.int("take");
+    t.nonNull.int("skip");
   },
 });
 export const newSubjectSchemas = objectType({
@@ -30,9 +32,17 @@ export const QuerySubject = extendType({
   definition(t) {
     t.nonNull.list.nonNull.field("allSubjects", {
       type: "newSubjectObject",
+      // args: {
+      //   take: nonNull(intArg()),
+      //   skip: nonNull(intArg()),
+      // },
       //@ts-ignore
       async resolve(parent, args, { prisma }, info) {
+        // for pagination
+        // const { take, skip } = args;
         const allSubjects = await prisma.subject.findMany({
+          // take,
+          // skip,
           include: {
             blogs: true, // Include all users in the returned object
           },
@@ -46,8 +56,18 @@ export const QuerySubject = extendType({
         id: nonNull(stringArg()),
       },
       //@ts-ignore
-      async resolve(parent, args, { blogs, prisma }, info) {
+      async resolve(parent, args, { userId, prisma }, info) {
         const { id } = args;
+        if (!userId) {
+          throw new Error(
+            "You are not authorised to view the subject if not signed in"
+          );
+        }
+        // if (postedById?.userId !== userId) {
+        //   throw new Error(
+        //     "You are not allowed to update the subject WHICH YOU DO NOT CREATE "
+        //   );
+        // }
         const oneSubjectData = await prisma.subject.findUnique({
           where: {
             id,
@@ -69,14 +89,14 @@ export const MutationSubject = extendType({
       type: "newSubjectObject",
       args: {
         userId: nonNull(stringArg()),
-        name: nonNull(stringArg())
+        name: nonNull(stringArg()),
       },
       //@ts-ignore
-      async resolve(parent, args, { blogs, prisma }, info) {
-        const { userId, name } = args;
+      async resolve(parent, args, { prisma }, info) {
+        const { name, userId } = args;
         const newSubjectAdded = await prisma.subject.create({
+          //@ts-ignore
           data: {
-            //@ts-ignore
             userId,
             name,
           },
@@ -96,6 +116,21 @@ export const MutationSubject = extendType({
       //@ts-ignore
       async resolve(parent, args, { blogs, prisma }, info) {
         const { name, id } = args;
+        // const postedById = await prisma.subject.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (!userId) {
+        //   throw new Error(
+        //     "You are not authorised to update the subject if not signed in"
+        //   );
+        // }
+        // if (postedById?.userId !== userId) {
+        //   throw new Error(
+        //     "You are not allowed to update the subject WHICH YOU DO NOT CREATE "
+        //   );
+        // }
         const updatedUserData = await prisma.subject.update({
           where: {
             id,
@@ -115,14 +150,35 @@ export const MutationSubject = extendType({
         id: nonNull(stringArg()),
       },
       //@ts-ignore
-      async resolve(parent, args, { prisma }, info) {
+      async resolve(parent, args, { prisma, userId }, info) {
         const { id } = args;
-        await prisma.subject.delete({
+        // const postedById = await prisma.subject.findUnique({
+        //   where: {
+        //     id,
+        //   },
+        // });
+        // if (!userId) {
+        //   throw new Error(
+        //     "You are not authorised to delete the subject if not signed in"
+        //   );
+        // }
+        // if (postedById?.userId !== userId) {
+        //   throw new Error(
+        //     "You are not allowed to delete the subject WHICH YOU DO NOT CREATE "
+        //   );
+        // }
+        try {
+           await prisma.subject.delete({
           where: {
             id,
           },
         });
         return deleteMsg;
+        } catch(error) {
+         if (error) {
+          throw new Error("You are not allowed to delete the subjects which contains the cards, first delete the cards!!")
+         }
+        }
       },
     });
   },
