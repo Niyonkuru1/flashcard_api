@@ -47,7 +47,7 @@ export const AuthMutation = extendType({
             throw new Error("User already exists.");
           }
           const hashedPassword = bcrypt.hashSync(args.password, 10);
-          const adminId = "5b0cce89-d975-471c-9adf-26983b65c372";
+          const adminId = "820ea0cf-c1c7-4449-987a-ed667c6adc51";
           const createdUser = await prisma.user.create({
             data: {
               firstName: args.firstName,
