@@ -76,7 +76,7 @@ export const AuthMutation = extendType({
 
       //@ts-ignore
       async resolve(parent, args, { prisma }, info) {
-          const adminId = "5b0cce89-d975-471c-9adf-26983b65c372";
+          const adminId = "820ea0cf-c1c7-4449-987a-ed667c6adc51";
         const { email, password } = args;
           const existingUser = await prisma.user.findUnique({
             where: {
